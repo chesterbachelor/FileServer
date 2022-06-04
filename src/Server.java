@@ -21,7 +21,7 @@ public class Server {
 
             OutputStream out = socket.getOutputStream();
             BufferedInputStream in = new BufferedInputStream(new FileInputStream(myFile));
-            while ((count = in.read(buffer)) > 0) {
+            while ((count = in.read(buffer)) >= 0) {
                 out.write(buffer, 0, count);
                 out.flush();
             }
