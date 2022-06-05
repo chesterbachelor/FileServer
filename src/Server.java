@@ -1,10 +1,16 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 
 public class Server {
 
     public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("Directory not chosen");
+            System.exit(1);
+        }
+        List<String> paths = FolderValidator.getValidPaths(args);
 
         try {
             ServerSocket server_socket = new ServerSocket(4422);
