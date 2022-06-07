@@ -4,8 +4,8 @@ import java.util.List;
 
 public class FolderValidator {
 
-    public static List<String> getValidPaths(String[] path) {
-        List<String> validPaths = new ArrayList<>();
+    public static List<File> getValidPaths(String[] path) {
+        List<File> validPaths = new ArrayList<>();
         for (String s : path) {
             File file = new File(s);
             if (!file.exists()){
@@ -14,7 +14,7 @@ public class FolderValidator {
             if (!file.isDirectory()){
                 System.out.println("Path you gave is not directory - " + s );
                 continue;}
-            validPaths.add(s);
+            validPaths.add(file);
         }
         return validPaths;
     }
