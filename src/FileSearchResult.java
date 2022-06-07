@@ -14,8 +14,8 @@ public class FileSearchResult implements Serializable {
             fileStatus = Status.MANY_FILES_FOUND;
         if(results.size()==1) {
             fileStatus = Status.FILE_FOUND;
-            File desiredFile = new File(results.get(0).getAbsolutePath());
-            fileLength = new Formatter().format("The size of the selected file is: %d bytes\n", desiredFile.length()).toString();
+            File requestedFile = new File(results.get(0).getAbsolutePath());
+            fileLength = new Formatter().format("The size of the selected file is: %d bytes\n", requestedFile.length()).toString();
         }
     }
 

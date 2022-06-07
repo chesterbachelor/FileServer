@@ -6,41 +6,59 @@ public class Client {
     public static void main(String args[]) {
         try {
             Socket socket = new Socket("localhost", 4422);
+            String fileName = readFileName();
+            sendFileName(socket, fileName);
 
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("Enter file name : ");
-            String msg = scanner.nextLine();
-
-            OutputStream outputStream = socket.getOutputStream();
-            DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-            dataOutputStream.writeUTF(msg);
-
-            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-            FileSearchResult result = (FileSearchResult) ois.readObject();
+            FileSearchResult result = receiveFileSearchResult(socket);
 
             System.out.println(result.fileStatus);
-            if(result.fileStatus!= FileSearchResult.Status.FILE_FOUND){
-                System.exit(1);}
-
+            if (result.fileStatus != FileSearchResult.Status.FILE_FOUND) {
+                System.exit(1);
+            }
             System.out.println(result.fileLength);
 
-            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream("D:\\image132.jpg"));
-            byte[] buffer = new byte[1024];
-            int count;
-            InputStream in = socket.getInputStream();
-            while ((count = in.read(buffer)) >= 0) {
-                out.write(buffer,0,count);
-                out.flush();
-            }
-            System.out.println("File Received");
-            in.close();
-            out.close();
-            ois.close();
-            dataOutputStream.close();
+            receiveAndSaveFile(socket,"D:\\image11.jpg");
+
             socket.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e);
         }
 
+    }
+
+    private static FileSearchResult receiveFileSearchResult(Socket socket) throws Exception {
+        ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+        FileSearchResult result = (FileSearchResult) ois.readObject();
+
+        return result;
+    }
+
+    private static String readFileName() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter file name : ");
+        String msg = scanner.nextLine();
+
+        scanner.close();
+        return msg;
+    }
+
+    static void receiveAndSaveFile(Socket socket,String outputFilePath) throws Exception {
+        BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(outputFilePath));
+        byte[] buffer = new byte[1024];
+        int count;
+        InputStream in = socket.getInputStream();
+        while ((count = in.read(buffer)) >= 0) {
+            out.write(buffer, 0, count);
+        }
+        out.flush();
+        System.out.println("File Received");
+
+        out.close();
+        in.close();
+    }
+
+    static void sendFileName(Socket socket, String fileName) throws Exception {
+        DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+        dataOutputStream.writeUTF(fileName);
     }
 }
