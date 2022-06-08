@@ -1,7 +1,6 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Server {
@@ -17,54 +16,26 @@ public class Server {
             System.exit(1);
         }
         try {
+            int portNum = 5000;
             ServerSocket server_socket = new ServerSocket(4422);
-            System.out.println("Created socket");
-            Socket socket = server_socket.accept();
-            System.out.println("Accepted socket");
-            String fileName = receiveFilePath(socket);
-
-            List<File> locations = FileFinder.getFileLocations(fileName, paths);
-
-            FileSearchResult result = fileSearching(socket, locations);
-            if (result.fileStatus != FileSearchResult.Status.FILE_FOUND) {
-                System.out.println("Error " + result.fileStatus + "\nProgram closing.");
-                System.exit(0);
+            while (true) {
+                System.out.println("Awaiting connection");
+                Socket socket = server_socket.accept();
+                new FileStreamer(paths, portNum).start();
+                sendPortNumberToClient(socket, portNum++);
+                if (portNum > 5100) portNum = 5000;
+                socket.close();
             }
-            sendFile(socket, locations.get(0).getAbsolutePath());
 
-            socket.close();
-
-        } catch (Exception ex) {
-            System.out.println("Error");
+        } catch (Exception e) {
+            System.out.println("Something went wrong");
         }
     }
 
-    static void sendFile(Socket socket, String path) throws Exception {
-        int count = 0;
-        byte[] buffer = new byte[1024];
-        OutputStream out = socket.getOutputStream();
-        BufferedInputStream in = new BufferedInputStream(new FileInputStream(path));
-        while ((count = in.read(buffer)) >= 0) {
-            out.write(buffer, 0, count);
-        }
-        out.flush();
-        System.out.println("Sent file");
-        in.close();
-        out.close();
-    }
-
-    static FileSearchResult fileSearching(Socket socket, List<File> locations) throws Exception {
-        FileSearchResult result = new FileSearchResult(locations);
-        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-        oos.writeObject(result);
-        return result;
-    }
-
-    static String receiveFilePath(Socket socket) throws Exception {
-        System.out.println("Waiting for file name");
-        DataInputStream dis = new DataInputStream(socket.getInputStream());
-        String fileName = dis.readUTF();
-        return fileName;
-
+    static void sendPortNumberToClient(Socket socket, int portNum) throws Exception {
+        DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+        dos.writeInt(portNum);
+        System.out.println("Client connected to port " + portNum);
     }
 }
+

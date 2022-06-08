@@ -1,11 +1,16 @@
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Scanner;
 
 public class Client {
     public static void main(String args[]) {
         try {
-            Socket socket = new Socket("localhost", 4422);
+            int portNum = connectingToReceivePortNumber();
+
+            Socket socket = new Socket("localhost",portNum);
+            System.out.println("Connected to port - " + socket.getLocalPort());
+            System.out.println("Connected to port - " + socket.getPort());
             String fileName = readFileName();
             sendFileName(socket, fileName);
 
@@ -17,11 +22,13 @@ public class Client {
             }
             System.out.println(result.fileLength);
 
-            receiveAndSaveFile(socket,"D:\\image11.jpg");
+            receiveAndSaveFile(socket,"D:\\" + fileName);
 
             socket.close();
-        } catch (Exception e) {
-            System.out.println(e);
+        } catch (SocketException e) {
+            System.out.println("Socket already taken");
+        }catch (Exception exception){
+            System.out.println(exception);
         }
 
     }
@@ -60,5 +67,15 @@ public class Client {
     static void sendFileName(Socket socket, String fileName) throws Exception {
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
         dataOutputStream.writeUTF(fileName);
+    }
+    static int connectingToReceivePortNumber() throws Exception
+    {
+        Socket socket1 = new Socket("localhost", 4422);
+        DataInputStream dis = new DataInputStream(socket1.getInputStream());
+        int portNum = dis.readInt();
+        System.out.println(portNum);
+        socket1.close();
+        return portNum;
+
     }
 }
