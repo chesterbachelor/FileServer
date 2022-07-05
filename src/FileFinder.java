@@ -1,23 +1,16 @@
 import java.io.File;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class FileFinder {
 
-    public static File findFile(String fileName, File directory) {
-        File[] list = directory.listFiles();
-
-        for (File file : list)
-            if (file.getName().equalsIgnoreCase(fileName))
-                return file;
-        return null;
-    }
-    public static List<File> getFileLocations(String fileName,List<File> paths) {
-
-        List<File> locations = new ArrayList<>();
-        for (File path : paths)
-            if (FileFinder.findFile(fileName, path) != null)
-                locations.add(new File(path + "\\" + fileName));
-        return locations;
+    public static List<File> getFileLocations(String fileName, List<File> paths) {
+        return paths.stream()
+                .map(File::listFiles)
+                .filter(Objects::nonNull)
+                .flatMap(Arrays::stream)
+                .filter(file -> file.getName().equalsIgnoreCase(fileName))
+                .toList();
     }
 }
